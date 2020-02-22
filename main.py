@@ -1,43 +1,22 @@
+import os
 import webapp2
-import cgi
+import jinja2
 
-home = '''
-<form method="get">
-    <input name="q">
-    <input type="submit">
-</form>
-'''
-signup = '''
-Signup
-<form method="get" action="/welcome">
-    <label>Username<input name="username" type="text"></label><br>
-    <label>Password<input name="password" type="password"></label><br>
-    <label>Password<input name="pass-verify" type="password"></label><br>
-    <label>Email<input name="email" type="email"></label><br>
-    <input type="submit">
-</form>
-'''
-welcome = '''
-Welcome %s!
-'''
+from google.appengine.ext import db
+
+templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
+class Handler(webapp2.RequestHandler):
+    def write(self, *a, **kw):
+        self.response.out.write(*a, **kw)
+
+    def render(self, template, **kw):
+        self.write(jinja_env.get_template(template).render(kw))
 
 
-class MainPage(webapp2.RequestHandler):
+class MainPage(Handler):
     def get(self):
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.write(home)
+        self.write("hello world!")
 
 
-class SignupPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.write(signup)
-
-
-class WelcomePage(webapp2.RedirectHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.write(welcome % self.request.get("username"))
-
-
-app = webapp2.WSGIApplication([('/', MainPage), ('/signup', SignupPage), ('/welcome', WelcomePage)], debug=True)
+app = webapp2.WSGIApplication([('/', MainPage)], debug=True)
