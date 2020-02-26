@@ -16,8 +16,12 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(jinja_env.get_template(template).render(kw))
 
+class BlogPost(db.Model):
+    title = db.StringProperty(required=True)
+    message = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
-class MainPage(Handler):
+class FrontPage(Handler):
     def render_front(self, title="", msg="", err=""):
         self.render("front.html", title=title, message=msg, error=err)
 
@@ -29,9 +33,11 @@ class MainPage(Handler):
         message = self.request.get("message")
 
         if title and message:
+            b = BlogPost(title=title, message=message)
+            b.put()
             self.write("post submitted. yas! 🔥✌️")
         else:
             self.render_front(title, message, "both a title and a message are required!")
 
 
-app = webapp2.WSGIApplication([('/', MainPage)], debug=True)
+app = webapp2.WSGIApplication([('/', FrontPage)], debug=True)
