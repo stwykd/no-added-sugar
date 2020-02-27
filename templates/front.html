@@ -20,5 +20,13 @@
         <br>
         <div class="error">{{error}}</div>
     </form>
+    <hr>
+    {% for post in posts %}
+        <div class="blog-post">
+            <div class="post-title">{{post.title}}</div>
+            <pre class="post-message">{{post.message}}</pre>
+        </div>
+    {% endfor %}
+
 </body>
 </html>

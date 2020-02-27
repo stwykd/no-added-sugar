@@ -1,5 +1,7 @@
 # coding=utf-8
 import os
+import time
+
 import webapp2
 import jinja2
 
@@ -23,7 +25,8 @@ class BlogPost(db.Model):
 
 class FrontPage(Handler):
     def render_front(self, title="", msg="", err=""):
-        self.render("front.html", title=title, message=msg, error=err)
+        posts = db.GqlQuery("select * from BlogPost order by created desc")
+        self.render("front.html", title=title, message=msg, error=err, posts=posts)
 
     def get(self):
         self.render_front()
@@ -35,7 +38,7 @@ class FrontPage(Handler):
         if title and message:
             b = BlogPost(title=title, message=message)
             b.put()
-            self.write("post submitted. yas! 🔥✌️")
+            self.write('post submitted. yas! 🔥✌️<br><a href="/">back to front page</a>')
         else:
             self.render_front(title, message, "both a title and a message are required!")
 
