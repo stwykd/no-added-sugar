@@ -4,8 +4,52 @@
     <meta charset="UTF-8">
     <title>no added sugar</title>
 </head>
+<style type="text/css">
+  body {
+	  font-family: sans-serif;
+	  width: 800px;
+	  margin: 0 auto;
+	  padding: 10px;
+  }
+  label {
+	  display: block;
+	  font-size: 20px;
+  }
+  input[type=text] {
+	  width: 400px;
+	  font-size: 20px;
+	  padding: 2px;
+  }
+  textarea {
+	  width: 400px;
+	  height:200px;
+	  font-size: 17px;
+	  font-family: monospace;
+  }
+  input[type=submit] {
+	  font-size: 24px;
+  }
+  hr {
+	  margin: 20px auto;
+  }
+  .blog-post + .blog-post {
+	  margin-top: 20px;
+  }
+  .post-title {
+	  font-weight: bold;
+	  font-size: 20px;
+	  color: #a0a0e6
+  }
+  .post-message {
+	  margin: 0;
+	  font-size: 17px;
+  }
+  .error {
+     color: red
+  }
+</style>
 <body>
-    <h1>/*/ blog post */*</h1>
+    <h1><marquee>/*/ blog post */*</marquee></h1>
     <form method="post">
         <label>
             <div>title</div>
@@ -17,7 +61,7 @@
         </label>
         <br>
         <input type="submit">
-        <br>
+        <br><br>
         <div class="error">{{error}}</div>
     </form>
     <hr>
