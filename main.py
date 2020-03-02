@@ -1,11 +1,16 @@
 # coding=utf-8
 import os
-import time
 
-import webapp2
 import jinja2
-
+import webapp2
 from google.appengine.ext import db
+
+
+class BlogPost(db.Model):
+    title = db.StringProperty(required=True)
+    message = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+
 
 templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
@@ -18,18 +23,28 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(jinja_env.get_template(template).render(kw))
 
-class BlogPost(db.Model):
-    title = db.StringProperty(required=True)
-    message = db.TextProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
 
-class FrontPage(Handler):
-    def render_front(self, title="", msg="", err=""):
+class MainPage(Handler):
+    def get(self):
+        self.redirect('/blog')
+
+
+class BlogPage(Handler):
+    def render_blog(self):
         posts = db.GqlQuery("select * from BlogPost order by created desc")
-        self.render("front.html", title=title, message=msg, error=err, posts=posts)
+        self.render("blog.html", posts=posts)
 
     def get(self):
-        self.render_front()
+        self.render_blog()
+
+
+class PostPage(Handler):
+    def render_post(self, title="", msg="", err=""):
+        posts = db.GqlQuery("select * from BlogPost order by created desc")
+        self.render("post.html", title=title, message=msg, error=err, posts=posts)
+
+    def get(self):
+        self.render_post()
 
     def post(self):
         title = self.request.get("title")
@@ -38,9 +53,13 @@ class FrontPage(Handler):
         if title and message:
             b = BlogPost(title=title, message=message)
             b.put()
-            self.write('post submitted. yas! 🔥✌️<br><a href="/">back to front page</a>')
+            self.write('post submitted. yas! 🔥✌️<br><a href="/blog">back to home</a>')
         else:
-            self.render_front(title, message, "both a title and a message are required!")
+            self.render_post(title, message, "both a title and a message are required!")
 
 
-app = webapp2.WSGIApplication([('/', FrontPage)], debug=True)
+app = webapp2.WSGIApplication([
+    ('/', MainPage),
+    ('/blog', BlogPage),
+    ('/blog/post', PostPage),
+], debug=True)
