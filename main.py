@@ -38,13 +38,13 @@ class BlogPage(Handler):
         self.render_blog()
 
 
-class PostPage(Handler):
-    def render_post(self, title="", msg="", err=""):
+class SubmitPage(Handler):
+    def render_submit(self, title="", msg="", err=""):
         posts = db.GqlQuery("select * from BlogPost order by created desc")
-        self.render("post.html", title=title, message=msg, error=err, posts=posts)
+        self.render("submit.html", title=title, message=msg, error=err, posts=posts)
 
     def get(self):
-        self.render_post()
+        self.render_submit()
 
     def post(self):
         title = self.request.get("title")
@@ -55,11 +55,10 @@ class PostPage(Handler):
             b.put()
             self.write('post submitted. yas! 🔥✌️<br><a href="/blog">back to home</a>')
         else:
-            self.render_post(title, message, "both a title and a message are required!")
-
+            self.render_submit(title, message, "both a title and a message are required!")
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/blog', BlogPage),
-    ('/blog/post', PostPage),
+    ('/blog/submit', SubmitPage),
 ], debug=True)
