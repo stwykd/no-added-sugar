@@ -11,6 +11,9 @@ class BlogPost(db.Model):
     message = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
 
+    def render(self):
+        return jinja_env.get_template('post.html').render(p=self)
+
 
 templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
@@ -51,14 +54,31 @@ class SubmitPage(Handler):
         message = self.request.get("message")
 
         if title and message:
-            b = BlogPost(title=title, message=message)
-            b.put()
-            self.write('post submitted. yas! 🔥✌️<br><a href="/blog">back to home</a>')
+            bp = BlogPost(title=title, message=message)
+            bp.put()
+            # self.write('post submitted. yas! 🔥✌️<br><a href="/blog">back to home</a>')
+            self.redirect('%s' % str(bp.key().id()))
         else:
             self.render_submit(title, message, "both a title and a message are required!")
+
+
+class PostPage(Handler):
+    def get(self, post_id):
+        key = db.Key.from_path('BlogPost', int(post_id))
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+        else:
+            self.render("permalink.html", post=post)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/blog', BlogPage),
+    ('/blog/', BlogPage),
     ('/blog/submit', SubmitPage),
+    ('/blog/submit/', SubmitPage),
+    ('/blog/([0-9]+)', PostPage),
+    ('/blog/([0-9]+)/', PostPage),
 ], debug=True)
