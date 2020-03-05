@@ -5,6 +5,10 @@
         <title>no added sugar</title>
     </head>
     <style type="text/css">
+<!--        @import url('https://fonts.googleapis.com/css?family=Single+Day&display=swap');-->
+<!--        @import url('https://fonts.googleapis.com/css?family=Patrick+Hand&display=swap');-->
+<!--        @import url('https://fonts.googleapis.com/css?family=Permanent+Marker&display=swap');-->
+<!--        @import url('https://fonts.googleapis.com/css?family=Homemade+Apple&display=swap');-->
         body {
             font-family: sans-serif;
             width: 800px;
@@ -32,9 +36,21 @@
         hr {
             margin: 20px auto;
         }
+        .blog-title-kawai {
+            font-family: 'Single Day', cursive;
+            display: block;
+            font-size: 40px;
+            font: Permanent Marker;
+            text-align: center;
+            margin-bottom: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #a0a0e6
+        }
         .blog-title {
             display: block;
             font-size: 40px;
+            font: Permanent Marker;
             text-align: center;
             margin-bottom: 30px;
             text-decoration: none;
@@ -58,7 +74,11 @@
         }
     </style>
     <body>
-        <a href="/blog" class="blog-title">no added sugar ʕっ•ᴥ•ʔっ</a>
+        {% if [0, 1] | random == 1 %}
+            <a href="/blog" class="blog-title-kawai">무첨가 설탕</a>
+        {% else %}
+            <a href="/blog" class="blog-title">no added sugar ʕっ•ᴥ•ʔっ</a>
+        {% endif %}
         {% block content %}
         {% endblock %}
     </body>
