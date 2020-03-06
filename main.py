@@ -72,6 +72,10 @@ class PostPage(Handler):
         else:
             self.render("permalink.html", post=post)
 
+class NotFoundPage(Handler):
+    def get(self):
+        self.error(404)
+        self.render('404.html')
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
@@ -81,4 +85,5 @@ app = webapp2.WSGIApplication([
     ('/blog/submit/', SubmitPage),
     ('/blog/([0-9]+)', PostPage),
     ('/blog/([0-9]+)/', PostPage),
+    ('/.*', NotFoundPage),
 ], debug=True)
