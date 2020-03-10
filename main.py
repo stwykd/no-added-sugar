@@ -139,10 +139,10 @@ class NotFoundPage(Handler):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/signup', SignupPage), ('/signup/', SignupPage),
-    ('/welcome', WelcomePage), ('/welcome/', SignupPage),
-    ('/blog', BlogPage), ('/blog/', BlogPage),
-    ('/blog/submit', SubmitPage), ('/blog/submit/', SubmitPage),
-    ('/blog/([0-9]+)', PostPage), ('/blog/([0-9]+)/', PostPage),
+    ('/signup', SignupPage),
+    ('/welcome', WelcomePage),
+    ('/blog', BlogPage),
+    ('/blog/submit', SubmitPage),
+    ('/blog/([0-9]+)', PostPage),
     ('/.*', NotFoundPage),
 ], debug=True)
