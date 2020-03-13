@@ -6,6 +6,8 @@ import jinja2
 import webapp2
 from google.appengine.ext import db
 
+import hashing
+
 
 class BlogPost(db.Model):
     title = db.StringProperty(required=True)
@@ -15,11 +17,35 @@ class BlogPost(db.Model):
     def render(self):
         return jinja_env.get_template('post.html').render(p=self)
 
+def users_key(group='default'):  # creates the ancestor element in the database to store all users
+    return db.Key.from_path('users', group)
+class User(db.Model):
+    name = db.StringProperty(required=True)
+    pw_hash = db.StringProperty(required=True)
+    email = db.StringProperty()
+    @classmethod
+    def by_id(cls, uid):
+        return User.get_by_id(uid, parent=users_key())
+
+    @classmethod
+    def by_name(cls, name):
+        u = cls.all().filter('name =', name).get()
+        return u
+
+    @classmethod
+    def register(cls, name, pw, email=None):
+        pw_hash = hashing.make_pw_hash(name, pw)
+        return cls(parent=users_key(), name=name, pw_hash=pw_hash, email=email)
+
+    @classmethod
+    def login(cls, name, pw):
+        u = cls.by_name(name)
+        if u and hashing.valid_pw(name, pw, u.pw_hash):
+            return u
+
 
 templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
-
-
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -77,20 +103,12 @@ class PostPage(Handler):
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile(r"^.{3,20}$")
 EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-
-
 def valid_username(username):
     return username and USER_RE.match(username)
-
-
 def valid_password(password):
     return password and PASS_RE.match(password)
-
-
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
-
-
 class SignupPage(Handler):
     def get(self):
         self.render("signup.html")
