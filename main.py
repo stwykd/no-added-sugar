@@ -53,6 +53,26 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(jinja_env.get_template(template).render(kw))
 
+    def set_cookie(self, name, val):
+        cookie_val = hashing.make_hash(val)
+        # Add `expire` to allow cookies to persist
+        self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (name, cookie_val))
+
+    def read_cookie(self, name):
+        cookie_val = self.request.cookies.get(name)
+        return cookie_val and hashing.check_hash(cookie_val)
+
+    def login(self, user):
+        self.set_cookie('user_id', str(user.key().id()))
+
+    def logout(self):
+        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
+
+    def initialize(self, *a, **kw):  # initialize() is called before every request
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        uid = self.read_cookie('user_id')
+        self.user = uid and User.by_id(int(uid))
+
 
 class MainPage(Handler):
     def get(self):
