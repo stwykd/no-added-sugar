@@ -144,6 +144,9 @@ class SignupPage(Handler):
         if not valid_username(username):
             params['error_username'] = "That's not a valid username."
             have_error = True
+        if User.by_name(username):
+            params['error_username'] = 'this user already exists'
+            have_error = True
         if not valid_password(password):
             params['error_password'] = "That wasn't a valid password."
             have_error = True
@@ -157,14 +160,16 @@ class SignupPage(Handler):
         if have_error:
             self.render('signup.html', **params)
         else:
-            self.redirect('/welcome?username=' + username)
+            u = User.register(username, password, email)
+            u.put()
+            self.login(u)
+            self.redirect('/welcome')
 
 
 class WelcomePage(Handler):
     def get(self):
-        username = self.request.get('username')
-        if valid_username(username):
-            self.render('welcome.html', username=username)
+        if self.user:
+            self.render('welcome.html', username=self.user.name)
         else:
             self.redirect('/signup')
 
