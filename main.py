@@ -173,6 +173,23 @@ class WelcomePage(Handler):
         else:
             self.redirect('/signup')
 
+class LoginPage(Handler):
+    def get(self):
+        if self.user:
+            self.write('already logged in, yas! 🔥✌️<br><a href="/blog">back to home</a>')
+        else:
+            self.render('login.html')
+
+    def post(self):
+        username = self.request.get('username')
+        password = self.request.get('password')
+
+        u = User.login(username, password)
+        if u:
+            self.login(u)
+            self.redirect('/welcome')
+        else:
+            self.render('login.html', error='invalid login')
 
 class NotFoundPage(Handler):
     def get(self):
@@ -183,6 +200,7 @@ class NotFoundPage(Handler):
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/signup', SignupPage),
+    ('/login', LoginPage),
     ('/welcome', WelcomePage),
     ('/blog', BlogPage),
     ('/blog/submit', SubmitPage),
