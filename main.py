@@ -191,6 +191,11 @@ class LoginPage(Handler):
         else:
             self.render('login.html', error='invalid login')
 
+class LogoutPage(Handler):
+    def get(self):
+        self.logout()
+        self.write('logged out! ✌️<br><a href="/blog">back to home</a>')
+
 class NotFoundPage(Handler):
     def get(self):
         self.error(404)
@@ -201,6 +206,7 @@ app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/signup', SignupPage),
     ('/login', LoginPage),
+    ('/logout', LogoutPage),
     ('/welcome', WelcomePage),
     ('/blog', BlogPage),
     ('/blog/submit', SubmitPage),
