@@ -129,9 +129,12 @@ def valid_password(password):
     return password and PASS_RE.match(password)
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
-class SignupPage(Handler):
+class SignupPage(Handler):  # users registering the same username at the same time. use memcache for locking
     def get(self):
-        self.render("signup.html")
+        if self.user:
+            self.write('already logged in, yas! 🔥✌️<br><a href="/blog">back to home</a>')
+        else:
+            self.render("signup.html")
 
     def post(self):
         username = self.request.get('username')
