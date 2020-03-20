@@ -9,6 +9,9 @@ from google.appengine.ext import db
 import hashing
 
 
+templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
+
 class BlogPost(db.Model):
     title = db.StringProperty(required=True)
     message = db.TextProperty(required=True)
@@ -43,9 +46,6 @@ class User(db.Model):
         if u and hashing.valid_pw(name, pw, u.pw_hash):
             return u
 
-
-templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
@@ -103,7 +103,6 @@ class SubmitPage(Handler):
         if title and message:
             bp = BlogPost(title=title, message=message)
             bp.put()
-            # self.write('post submitted. yas! 🔥✌️<br><a href="/blog">back to home</a>')
             self.redirect('%s' % str(bp.key().id()))
         else:
             self.render_submit(title, message, "both a title and a message are required!")
@@ -119,20 +118,23 @@ class PostPage(Handler):
         else:
             self.render("permalink.html", post=post)
 
-
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-PASS_RE = re.compile(r"^.{3,20}$")
-EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-def valid_username(username):
-    return username and USER_RE.match(username)
-def valid_password(password):
-    return password and PASS_RE.match(password)
-def valid_email(email):
-    return not email or EMAIL_RE.match(email)
 class SignupPage(Handler):  # users registering the same username at the same time. use memcache for locking
+    USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+    PASS_RE = re.compile(r"^.{3,20}$")
+    EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+
+    def valid_username(self, username):
+        return username and self.USER_RE.match(username)
+
+    def valid_password(self, password):
+        return password and self.PASS_RE.match(password)
+
+    def valid_email(self, email):
+        return not email or self.EMAIL_RE.match(email)
+
     def get(self):
         if self.user:
-            self.write('already logged in, yas! 🔥✌️<br><a href="/blog">back to home</a>')
+            self.render('loggedin.html')
         else:
             self.render("signup.html")
 
@@ -144,19 +146,19 @@ class SignupPage(Handler):  # users registering the same username at the same ti
 
         have_error = False
         params = dict(username=username, email=email)
-        if not valid_username(username):
+        if not self.valid_username(username):
             params['error_username'] = "That's not a valid username."
             have_error = True
         if User.by_name(username):
             params['error_username'] = 'this user already exists'
             have_error = True
-        if not valid_password(password):
+        if not self.valid_password(password):
             params['error_password'] = "That wasn't a valid password."
             have_error = True
         elif password != verify:
             params['error_verify'] = "Your passwords didn't match."
             have_error = True
-        if not valid_email(email):
+        if not self.valid_email(email):
             params['error_email'] = "That's not a valid email."
             have_error = True
 
@@ -179,7 +181,7 @@ class WelcomePage(Handler):
 class LoginPage(Handler):
     def get(self):
         if self.user:
-            self.write('already logged in, yas! 🔥✌️<br><a href="/blog">back to home</a>')
+            self.render('loggedin.html')
         else:
             self.render('login.html')
 
@@ -197,7 +199,7 @@ class LoginPage(Handler):
 class LogoutPage(Handler):
     def get(self):
         self.logout()
-        self.write('logged out! ✌️<br><a href="/blog">back to home</a>')
+        self.render('loggedout.html')
 
 class NotFoundPage(Handler):
     def get(self):
