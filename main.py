@@ -1,4 +1,5 @@
 # coding=utf-8
+import json
 import os
 import re
 
@@ -19,6 +20,9 @@ class BlogPost(db.Model):
 
     def render(self):
         return jinja_env.get_template('post.html').render(p=self)
+
+    def as_dict(self):
+        return {'title': self.title, 'message': self.message, 'created': self.created.strftime('%c')}
 
 def users_key(group='default'):  # creates the ancestor element in the database to store all users
     return db.Key.from_path('users', group)
@@ -53,6 +57,10 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(jinja_env.get_template(template).render(kw))
 
+    def render_json(self, v):
+        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+        self.write(json.dumps(v))
+
     def set_cookie(self, name, val):
         cookie_val = hashing.make_hash(val)
         # Add `expire` to allow cookies to persist
@@ -73,6 +81,11 @@ class Handler(webapp2.RequestHandler):
         uid = self.read_cookie('user_id')
         self.user = uid and User.by_id(int(uid))
 
+        if self.request.url.endswith('.json'):
+            self.format = 'json'
+        else:
+            self.format = 'html'
+
 
 class MainPage(Handler):
     def get(self):
@@ -82,7 +95,10 @@ class MainPage(Handler):
 class BlogPage(Handler):
     def render_blog(self):
         posts = db.GqlQuery("select * from BlogPost order by created desc")
-        self.render("blog.html", posts=posts)
+        if self.format == 'html':
+            self.render("blog.html", posts=posts)
+        else:
+            return self.render_json([post.as_dict() for post in posts])
 
     def get(self):
         self.render_blog()
@@ -116,7 +132,10 @@ class PostPage(Handler):
         if not post:
             self.error(404)
         else:
-            self.render("permalink.html", post=post)
+            if self.format == 'html':
+                self.render("permalink.html", post=post)
+            else:
+                self.render_json(post.as_dict())
 
 class SignupPage(Handler):  # users registering the same username at the same time. use memcache for locking
     USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -213,8 +232,8 @@ app = webapp2.WSGIApplication([
     ('/login', LoginPage),
     ('/logout', LogoutPage),
     ('/welcome', WelcomePage),
-    ('/blog', BlogPage),
+    ('/blog/?(?:\\.json)?', BlogPage),
     ('/blog/submit', SubmitPage),
-    ('/blog/([0-9]+)', PostPage),
+    ('/blog/([0-9]+)(?:\\.json)?', PostPage),
     ('/.*', NotFoundPage),
 ], debug=True)
