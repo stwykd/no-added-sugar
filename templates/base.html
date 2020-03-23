@@ -45,7 +45,7 @@
             margin-bottom: 30px;
             text-decoration: none;
             font-weight: bold;
-            color: #a0a0e6
+            color: #a0a0e6;
         }
         .blog-title {
             display: block;
@@ -54,23 +54,34 @@
             margin-bottom: 30px;
             text-decoration: none;
             font-weight: bold;
-            color: #a0a0e6
+            color: #a0a0e6;
         }
         .blog-post + .blog-post {
             margin-top: 20px;
         }
         .post-title {
+            text-decoration: none;
             font-weight: bold;
             font-size: 20px;
-            color: #a0a0e6
+            color: #a0a0e6;
         }
         .post-message {
             margin: 0;
             font-size: 17px;
         }
         .error {
-           color: red
+           color: red;
         }
+        .age {
+            bottom: 0px;
+            right: 0px;
+            color: gray;
+            font-size: 12px;
+        }
+        .blog-post + .age {
+            margin-top: 20px;
+        }
+
     </style>
     <body>
         {% if [0, 1] | random == 1 %}

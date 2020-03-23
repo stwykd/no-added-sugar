@@ -2,13 +2,14 @@
 import json
 import os
 import re
+from datetime import datetime
 
 import jinja2
 import webapp2
+from google.appengine.api import memcache
 from google.appengine.ext import db
 
 import hashing
-
 
 templ_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(templ_dir), autoescape=True)
@@ -19,7 +20,7 @@ class BlogPost(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
 
     def render(self):
-        return jinja_env.get_template('post.html').render(p=self)
+        return jinja_env.get_template('post.html').render(p=self, id=str(self.key().id()))
 
     def as_dict(self):
         return {'title': self.title, 'message': self.message, 'created': self.created.strftime('%c')}
@@ -36,13 +37,11 @@ class User(db.Model):
 
     @classmethod
     def by_name(cls, name):
-        u = cls.all().filter('name =', name).get()
-        return u
+        return cls.all().filter('name =', name).get()
 
     @classmethod
     def register(cls, name, pw, email=None):
-        pw_hash = hashing.make_pw_hash(name, pw)
-        return cls(parent=users_key(), name=name, pw_hash=pw_hash, email=email)
+        return cls(parent=users_key(), name=name, pw_hash=hashing.make_pw_hash(name, pw), email=email)
 
     @classmethod
     def login(cls, name, pw):
@@ -93,20 +92,16 @@ class MainPage(Handler):
 
 
 class BlogPage(Handler):
-    def render_blog(self):
-        posts = db.GqlQuery("select * from BlogPost order by created desc")
+    def get(self):
+        posts, age = get_posts()
         if self.format == 'html':
-            self.render("blog.html", posts=posts)
+            self.render("blog.html", posts=posts, age=age_str(age))
         else:
             return self.render_json([post.as_dict() for post in posts])
 
-    def get(self):
-        self.render_blog()
-
-
 class SubmitPage(Handler):
     def render_submit(self, title="", msg="", err=""):
-        posts = db.GqlQuery("select * from BlogPost order by created desc")
+        posts = list(db.GqlQuery("select * from BlogPost order by created desc"))
         self.render("submit.html", title=title, message=msg, error=err, posts=posts)
 
     def get(self):
@@ -126,16 +121,20 @@ class SubmitPage(Handler):
 
 class PostPage(Handler):
     def get(self, post_id):
-        key = db.Key.from_path('BlogPost', int(post_id))
-        post = db.get(key)
-
+        post_key = 'POST_'+post_id
+        post, age = memcache_get_age(post_key)
+        if not post:
+            key = db.Key.from_path('BlogPost', int(post_id))
+            post = db.get(key)
+            memcache_set_age(post_key, post)
+            age = 0
         if not post:
             self.error(404)
+            return
+        if self.format == 'html':
+            self.render("permalink.html", post=post, age=age_str(age))
         else:
-            if self.format == 'html':
-                self.render("permalink.html", post=post)
-            else:
-                self.render_json(post.as_dict())
+            self.render_json(post.as_dict())
 
 class SignupPage(Handler):  # users registering the same username at the same time. use memcache for locking
     USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -169,7 +168,7 @@ class SignupPage(Handler):  # users registering the same username at the same ti
             params['error_username'] = "That's not a valid username."
             have_error = True
         if User.by_name(username):
-            params['error_username'] = 'this user already exists'
+            params['error_username'] = 'This user already exists'
             have_error = True
         if not self.valid_password(password):
             params['error_password'] = "That wasn't a valid password."
@@ -224,6 +223,41 @@ class NotFoundPage(Handler):
     def get(self):
         self.error(404)
         self.render('404.html')
+
+
+def memcache_set_age(key, val):  # sets the val with the current datetime in memcache
+    memcache.set(key, (val, datetime.utcnow()))
+
+def memcache_get_age(key):  # gets the value and the datetime of when the value was stored from memcache
+    r = memcache.get(key)
+    if r:
+        val, save_time = r
+        age = (datetime.utcnow()-save_time).total_seconds()
+    else:
+        val, age = None, 0
+    return val, age
+
+def add_post(ip, post):
+    post.put()
+    get_posts(update=True)
+    return str(post.key().id())
+
+
+def get_posts(update=False):
+    q = BlogPost.all().order('-created').fetch(limit=10)
+    mc_key = 'POSTS'
+    posts, age = memcache_get_age(mc_key)
+    if update or posts is None:
+        posts = list(q)
+        memcache_set_age(mc_key, posts)
+    return posts, age
+
+def age_str(age):
+    s = 'db query %s seconds ago'
+    age = int(age)
+    if age == 1:
+        s.replace('seconds', 'second')
+    return s % age
 
 
 app = webapp2.WSGIApplication([
