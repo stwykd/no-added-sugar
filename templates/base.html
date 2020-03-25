@@ -1,89 +1,18 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link type="text/css" rel="stylesheet" href="/static/main.css"/>
         <meta charset="UTF-8">
         <title>no added sugar</title>
     </head>
-    <style type="text/css">
-        @import url('https://fonts.googleapis.com/css?family=Single+Day&display=swap');
-<!--        @import url('https://fonts.googleapis.com/css?family=Patrick+Hand&display=swap');-->
-<!--        @import url('https://fonts.googleapis.com/css?family=Permanent+Marker&display=swap');-->
-<!--        @import url('https://fonts.googleapis.com/css?family=Homemade+Apple&display=swap');-->
-        body {
-            font-family: sans-serif;
-            width: 800px;
-            margin: 0 auto;
-            padding: 10px;
-        }
-        label {
-            display: block;
-            font-size: 20px;
-        }
-        input[type=text] {
-            width: 400px;
-            font-size: 20px;
-            padding: 2px;
-        }
-        textarea {
-            width: 400px;
-            height:200px;
-            font-size: 17px;
-            font-family: monospace;
-        }
-        input[type=submit] {
-            font-size: 24px;
-        }
-        hr {
-            margin: 20px auto;
-        }
-        .blog-title-kawai {
-            font-family: 'Single Day', cursive;
-            display: block;
-            font-size: 40px;
-            font: Permanent Marker;
-            text-align: center;
-            margin-bottom: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            color: #a0a0e6;
-        }
-        .blog-title {
-            display: block;
-            font-size: 40px;
-            text-align: center;
-            margin-bottom: 30px;
-            text-decoration: none;
-            font-weight: bold;
-            color: #a0a0e6;
-        }
-        .blog-post + .blog-post {
-            margin-top: 20px;
-        }
-        .post-title {
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 20px;
-            color: #a0a0e6;
-        }
-        .post-message {
-            margin: 0;
-            font-size: 17px;
-        }
-        .error {
-           color: red;
-        }
-        .age {
-            bottom: 0px;
-            right: 0px;
-            color: gray;
-            font-size: 12px;
-        }
-        .blog-post + .age {
-            margin-top: 20px;
-        }
-
-    </style>
     <body>
+    <div class="login-area">
+        {% if user %}
+            {{user.name}} (<a class="login-link" href="/logout">logout</a>)
+        {% else %}
+            <a class="login-link" href="/login">login</a> <a class="login-link" href="/signup">signup</a>
+        {% endif %}
+    </div>
         {% if [0, 1] | random == 1 %}
             <a href="/blog" class="blog-title-kawai">무첨가 설탕 🔥🔥</a>
         {% else %}

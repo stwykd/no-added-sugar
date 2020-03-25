@@ -54,6 +54,7 @@ class Handler(webapp2.RequestHandler):
         self.response.out.write(*a, **kw)
 
     def render(self, template, **kw):
+        kw['user'] = self.user
         self.write(jinja_env.get_template(template).render(kw))
 
     def render_json(self, v):
@@ -75,7 +76,7 @@ class Handler(webapp2.RequestHandler):
     def logout(self):
         self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
-    def initialize(self, *a, **kw):  # initialize() is called before every request
+    def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_cookie('user_id')
         self.user = uid and User.by_id(int(uid))
@@ -192,7 +193,7 @@ class SignupPage(Handler):  # users registering the same username at the same ti
 class WelcomePage(Handler):
     def get(self):
         if self.user:
-            self.render('welcome.html', username=self.user.name)
+            self.render('welcome.html')
         else:
             self.redirect('/signup')
 
@@ -262,12 +263,12 @@ def age_str(age):
 
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-    ('/signup', SignupPage),
-    ('/login', LoginPage),
-    ('/logout', LogoutPage),
-    ('/welcome', WelcomePage),
-    ('/blog/?(?:\\.json)?', BlogPage),
-    ('/blog/submit', SubmitPage),
-    ('/blog/([0-9]+)(?:\\.json)?', PostPage),
+    ('/signup/?', SignupPage),
+    ('/login/?', LoginPage),
+    ('/logout/?', LogoutPage),
+    ('/welcome/?', WelcomePage),
+    ('/blog(?:\\.json)?/?', BlogPage),
+    ('/blog/submit/?', SubmitPage),
+    ('/blog/([0-9]+)(?:\\.json)?/?', PostPage),
     ('/.*', NotFoundPage),
 ], debug=True)
