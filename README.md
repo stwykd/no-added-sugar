@@ -1,9 +1,1 @@
-GoogleAppEngine+Datastore
-HTML+CSS
-templates
-cookies+hashing
-password+hashing, login/logout, signup
-API
-
-loadbalancing
-memcache
+no-added-sugar is a blog, live at https://no-added-sugar.appspot.com, where users can sign up, login, and submit blog posts. The front-end is simply HTML+CSS, and it is dynamically generated using templates. It exposes JSON API through endpoints ending in `.json`. It is built using Google App Engine and makes use of Datastore as a DB and memcache to cache static and least recent DB queries. Most of the code was hacked inside blog.py, while hashing.py contains utilities for password and cookie hashing.
