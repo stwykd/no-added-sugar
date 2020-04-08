@@ -29,8 +29,8 @@ input[type=submit] {
 hr {
     margin: 20px auto;
 }
-.blog-title-kawai {
-    font-family: 'Single Day', cursive;
+.blog-title-jp {
+    font-family: 'Noto Sans JP', sans-serif;
     display: block;
     font-size: 40px;
     font: Permanent Marker;

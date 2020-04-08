@@ -13,10 +13,15 @@
             <a class="login-link" href="/login">login</a> <a class="login-link" href="/signup">signup</a>
         {% endif %}
     </div>
-        {% if [0, 1] | random == 1 %}
-            <a href="/blog" class="blog-title-kawai">무첨가 설탕 🔥🔥</a>
-        {% else %}
-            <a href="/blog" class="blog-title">no added sugar ʕっ•ᴥ•ʔっ</a>
+        {% set r = range(4) | random %}
+        {% if r == 0 %}
+            <a href="/blog" class="blog-title-jp">砂糖を加えない 🌌🌌</a>
+        {% elif r == 1 %}
+            <a href="/blog" class="blog-title-jp">砂糖を加えない 🔥🔥</a>
+        {% elif r == 2 %}
+            <a href="/blog" class="blog-title">no-added-sugar ʕっ•ᴥ•ʔっ</a>
+        {% elif r == 3 %}
+            <a href="/blog" class="blog-title">no-added-sugar ʕ∙ჲ∙ʔ</a>
         {% endif %}
         {% block content %}
         {% endblock %}
