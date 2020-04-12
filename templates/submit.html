@@ -1,15 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1><marquee>/*/ submit blog post */*</marquee></h1>
     <form method="post">
-        <label>
-            <div>title</div>
-            <input type="text" name="title" value="{{title}}">
-        </label>
-        <label>
-            <div>message</div>
-            <textarea name="message">{{message}}</textarea>
-        </label>
+        <input type="text" name="title" placeholder="title here..." value="{{title}}">
+        <br>
+        <textarea name="message" placeholder="blog post here...">{{message}}</textarea>
         <br>
         <input type="submit">
         <br><br>

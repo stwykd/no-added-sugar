@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=Single+Day&display=swap');
 <!--@import url('https://fonts.googleapis.com/css?family=Patrick+Hand&display=swap');-->
 <!--@import url('https://fonts.googleapis.com/css?family=Permanent+Marker&display=swap');-->
 <!--@import url('https://fonts.googleapis.com/css?family=Homemade+Apple&display=swap');-->
+<!--@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');-->
 body {
     font-family: sans-serif;
     width: 800px;
@@ -21,7 +21,7 @@ textarea {
     width: 400px;
     height:200px;
     font-size: 17px;
-    font-family: monospace;
+    font-family: 'Roboto Mono', monospace;
 }
 input[type=submit] {
     font-size: 24px;
@@ -29,17 +29,7 @@ input[type=submit] {
 hr {
     margin: 20px auto;
 }
-.blog-title-jp {
-    font-family: 'Noto Sans JP', sans-serif;
-    display: block;
-    font-size: 40px;
-    font: Permanent Marker;
-    text-align: center;
-    margin-bottom: 30px;
-    text-decoration: none;
-    font-weight: bold;
-    color: #a0a0e6;
-}
+
 .blog-title {
     display: block;
     font-size: 40px;
@@ -59,8 +49,9 @@ hr {
     color: #a0a0e6;
 }
 .post-message {
-    margin: 0;
+    font-family: 'Roboto Mono', monospace;
     font-size: 17px;
+    margin: 0;
 }
 .error {
    color: red;
@@ -75,7 +66,7 @@ hr {
     margin-top: 20px;
 }
 .login-area {
-    font-size: 13px;
+    font-size: 16px;
     color: gray;
     position: absolute;
     top: 10px;
@@ -90,4 +81,36 @@ hr {
 }
 .login-link:hover {
     text-decoration: underline;
+}
+
+.submit-area {
+    font-size: 18px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.submit-button {
+	background-color:LightCyan;
+	border-radius:42px;
+	border:6px solid Indigo;
+	display:inline-block;
+	cursor:pointer;
+	color: #F0F8FF
+    font-family: 'Roboto Mono', monospace;
+	font-size:15px;
+	font-weight:bold;
+	padding:5px 7px;
+	text-decoration:none;
+}
+
+submit_button:focus {
+    background-color:Aquamarine;
+}
+.submit-button:hover {
+	background-color:LightGreen;
+}
+.submit-button:active {
+	position:relative;
+	top:1px;
 }
